@@ -275,6 +275,10 @@
       <mass value="0.05"/>
       <inertia ixx="3.2e-05" ixy="0.0" ixz="0.0" iyy="3.2e-05" iyz="0.0" izz="3.2e-05"/>
     </inertial>
+    <contact>
+      <lateral_friction value="1.0"/>
+      <restitution value="0.5"/>
+    </contact>
   </link>
 
   <joint name="FL_hip_joint" type="revolute">
@@ -472,6 +476,10 @@
       <mass value="0.05"/>
       <inertia ixx="3.2e-05" ixy="0.0" ixz="0.0" iyy="3.2e-05" iyz="0.0" izz="3.2e-05"/>
     </inertial>
+    <contact>
+      <lateral_friction value="1.0"/>
+      <restitution value="0.5"/>
+    </contact>
   </link>
 
   <joint name="RR_hip_joint" type="revolute">
@@ -669,6 +677,10 @@
       <mass value="0.05"/>
       <inertia ixx="3.2e-05" ixy="0.0" ixz="0.0" iyy="3.2e-05" iyz="0.0" izz="3.2e-05"/>
     </inertial>
+    <contact>
+      <lateral_friction value="1.0"/>
+      <restitution value="0.5"/>
+    </contact>
   </link>
 
   <joint name="RL_hip_joint" type="revolute">
@@ -866,6 +878,10 @@
       <mass value="0.05"/>
       <inertia ixx="3.2e-05" ixy="0.0" ixz="0.0" iyy="3.2e-05" iyz="0.0" izz="3.2e-05"/>
     </inertial>
+    <contact>
+      <lateral_friction value="1.0"/>
+      <restitution value="0.5"/>
+    </contact>
   </link>
 </robot>
 
