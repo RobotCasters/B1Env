@@ -90,11 +90,27 @@ class B1Sim(Env):
         for i, joint_ang in enumerate(target_joint_angles):
             p.resetJointState(self.robotID, self.active_joint_ids[i], joint_ang, 0.0)
 
+        q, dq = self.get_state_update_pinocchio()
+        info = self.get_info(q, dq)
+
+        return info
+
     def step(self, action):
         self.send_joint_command(action)
         p.stepSimulation()
 
         q, dq = self.get_state_update_pinocchio()
+        info = self.get_info(q, dq)
+
+        return info
+
+    def get_info(self, q, dq):
+        info = {
+            "q": q,
+            "dq": dq,
+        }
+
+        return info
 
     def close(self):
         p.disconnect()
