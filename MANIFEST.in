@@ -1,0 +1,4 @@
+include B1Env/robots/meshes/xacro/*.xacro
+include B1Env/robots/meshes/xacro/*.urdf
+include B1Env/robots/meshes/*.dae
+include B1Env/robots/*.urdf

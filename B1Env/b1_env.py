@@ -8,6 +8,8 @@ import pybullet_data
 from gymnasium import Env, spaces
 from pinocchio.robot_wrapper import RobotWrapper
 
+from B1Env import getDataPath
+
 
 class B1Sim(Env):
     def __init__(
@@ -28,7 +30,7 @@ class B1Sim(Env):
         p.loadURDF("plane.urdf")
 
         # Load Franka Research 3 Robot
-        package_directory = "/Users/bolundai/Documents/B1Env"
+        package_directory = getDataPath()
         robot_URDF = package_directory + "/robots/b1_box_collide.urdf"
         urdf_search_path = package_directory + "/robots"
         p.setAdditionalSearchPath(urdf_search_path)

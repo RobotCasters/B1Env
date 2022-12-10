@@ -1,6 +1,6 @@
 import numpy as np
 
-from b1_env import B1Sim
+from B1Env.b1_env import B1Sim
 
 
 def main():
