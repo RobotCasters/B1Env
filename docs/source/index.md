@@ -8,6 +8,8 @@
 ```
 
 ```{toctree}
-:caption: 'Contents:'
+:caption: 'B1Env:'
 :maxdepth: 2
+
+B1Env/index.md
 ```

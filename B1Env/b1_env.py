@@ -15,6 +15,14 @@ class B1Sim(Env):
     def __init__(
         self, render_mode: Optional[str] = None, record_path=None, useFixedBase=False
     ):
+        """
+        :param render_mode: if "human" the simultion will run in gui, otherwise it will be ran headless.
+        :type render_mode: str or None
+        :param record_path: the path where the recording of the simulation will be stored, if not specified the simulation will not be recorded.
+        :type record_path: str or None
+        :param useFixedBase: whether the base of the B1 robot will be fixed in air or will it be floating.
+        :type useFixedBase: bool
+        """
         if render_mode == "human":
             self.client = p.connect(p.GUI)
             # Improves rendering performance on M1 Macs
@@ -87,6 +95,16 @@ class B1Sim(Env):
         seed: Optional[int] = None,
         options: Optional[dict] = None,
     ):
+        """
+        Reset the simulation environment.
+
+        :param seed: random seed to be set to.
+        :type seed: int or None
+        :param options: options for resetting the environment.
+        :type options: dict or None
+        :return: information about the dynamics and kinematics of the robot.
+        :rtype: dict
+        """
         target_joint_angles = 12 * [0.0]
 
         for i, joint_ang in enumerate(target_joint_angles):
@@ -98,6 +116,14 @@ class B1Sim(Env):
         return info
 
     def step(self, action):
+        """
+        Step the PyBullet simulation environment.
+
+        :param action: joint torques to be applied to the robot
+        :type action: ndarray
+        :return: information about the dynamics and kinematics of the robot.
+        :rtype: dict
+        """
         self.send_joint_command(action)
         p.stepSimulation()
 
@@ -107,6 +133,16 @@ class B1Sim(Env):
         return info
 
     def get_info(self, q, dq):
+        """
+        Get and compute the kinematic and dynamics information of the robot.
+
+        :param q: joint positions of the robot.
+        :type q: ndarray
+        :param dq: joint velocities of the robot.
+        :type dq: ndarray
+        :return: information about the dynamics and kinematics of the robot.
+        :rtype: dict
+        """
         info = {
             "q": q,
             "dq": dq,
@@ -115,9 +151,16 @@ class B1Sim(Env):
         return info
 
     def close(self):
+        """Disconnecting from the PyBullet client"""
         p.disconnect()
 
     def get_state(self):
+        """
+        Get joint position and joint velocity from PyBullet simulation
+
+        :return: `(q, dq)` the joint position and joint velocity .
+        :rtype: Tuple(ndarray, ndarry)
+        """
         q = np.zeros(12)
         dq = np.zeros(12)
 
@@ -128,17 +171,37 @@ class B1Sim(Env):
         return q, dq
 
     def update_pinocchio(self, q, dq):
+        """
+        Update the robot model in Pinocchio.
+
+        :param q: joint positions of the robot.
+        :type q: ndarray
+        :param dq: joint velocities of the robot.
+        :type dq: ndarray
+        """
         self.robot.computeJointJacobians(q)
         self.robot.framesForwardKinematics(q)
         self.robot.centroidalMomentum(q, dq)
 
     def get_state_update_pinocchio(self):
+        """
+        Get the robot state from PyBullet and update the robot model in Pinocchio.
+
+        :return: `(q, dq)` the joint position and joint velocity .
+        :rtype: Tuple(ndarray, ndarry)
+        """
         q, dq = self.get_state()
         self.update_pinocchio(q, dq)
 
         return q, dq
 
     def send_joint_command(self, tau):
+        """
+        Apply the commanded joint torques to the PyBullet simulation.
+
+        :param tau: commanded joint torques.
+        :type tau: ndarray
+        """
         zeroGains = tau.shape[0] * (0.0,)
 
         p.setJointMotorControlArray(
