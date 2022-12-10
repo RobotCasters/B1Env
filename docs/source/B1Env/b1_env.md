@@ -13,3 +13,7 @@
    .. autofunction:: B1Env.b1_env.B1Sim.get_state_update_pinocchio
    .. autofunction:: B1Env.b1_env.B1Sim.send_joint_command
 ```
+
+```{eval-rst}
+.. autofunction:: B1Env.hello_world.main
+```
