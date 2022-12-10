@@ -8,6 +8,7 @@ hide-toc: true
 
 ```{toctree}
 :caption: 'B1Env:'
+:hidden:
 :maxdepth: 2
 
 B1Env/index.md
