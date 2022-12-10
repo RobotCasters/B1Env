@@ -2,11 +2,17 @@ from pdb import set_trace
 from typing import Optional
 
 import numpy as np
-import pinocchio as pin
 import pybullet as p
 import pybullet_data
 from gymnasium import Env, spaces
-from pinocchio.robot_wrapper import RobotWrapper
+
+# for readthedocs
+try:
+    import pinocchio as pin
+    from pinocchio.robot_wrapper import RobotWrapper
+except:
+    print("Pinocchio is not installed")
+
 
 from B1Env import getDataPath
 

@@ -4,6 +4,7 @@ from B1Env.b1_env import B1Sim
 
 
 def main():
+    """Hello world example for running the B1 simulation"""
     env = B1Sim(render_mode="human", useFixedBase=False)
     env.reset()
 
