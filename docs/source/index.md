@@ -12,5 +12,6 @@ hide-toc: true
 :maxdepth: 2
 
 B1Env/index.md
+quadruped/index.md
 notebooks/index.md
 ```
