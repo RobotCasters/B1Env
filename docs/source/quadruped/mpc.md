@@ -218,4 +218,4 @@ $$
 \end{align}
 $$(eqn:qp_solver_formulation)
 
-Thus, our final task is to transform the MPC formultion {eq}`eqn:mpc_formulation` into the form of {eq}`eqn:qp_solver_formulation`.
+Thus, our final task is to transform the MPC formulation {eq}`eqn:mpc_formulation` into the form of {eq}`eqn:qp_solver_formulation`.
