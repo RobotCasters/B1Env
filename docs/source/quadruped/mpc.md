@@ -398,7 +398,7 @@ with
 
 $$
 \begin{align}
-\mathbf{C}_\mathbf{f} &= \mathrm{blockdiag}\Big(\mathbf{c}_{\mathbf{f}}\mathcal{M}_{st}, \cdots, \mathbf{c}_{\mathbf{f}}\mathcal{M}_{st}\Big)\in\mathbb{R}^{6n_{st}N\times12N}\\
+\mathbf{C}_\mathbf{f} &= \mathrm{blockdiag}\Big(\mathbf{c}_{\mathbf{f}}\mathcal{M}_{st, 1}, \cdots, \mathbf{c}_{\mathbf{f}}\mathcal{M}_{st, N}\Big)\in\mathbb{R}^{6n_{st}N\times12N}\\
 \mathrm{UB}_\mathbf{f} &= \mathrm{vstack}\Big(\mathrm{ub}_\mathbf{f}, \cdots, \mathrm{ub}_\mathbf{f}\Big)\in\mathbb{R}^{6n_{st}N\times1}
 \end{align}
 $$
