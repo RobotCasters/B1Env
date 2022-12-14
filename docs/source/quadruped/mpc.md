@@ -214,7 +214,7 @@ $$
 \begin{align}
 \min_x\ &\ \frac{1}{2}x^T\mathbf{H}x + \mathbf{g}^Tx\\
 \mathrm{subject\ to}\ &\ \mathbf{A}x = \mathbf{b}\\
-                      &\ \mathrm{lb} \leq \mathbf{C}x \leq \mathrm{ub}.
+                      &\ \mathrm{LB} \leq \mathbf{C}x \leq \mathrm{UB}.
 \end{align}
 $$(eqn:qp_solver_formulation)
 
@@ -308,4 +308,105 @@ x &= \begin{bmatrix}
     \mathbf{g}_\mathbf{f}
 \end{bmatrix}\in\mathbb{R}^{27N\times1}.
 \end{align}
+$$
+
+### Inequality Constraint
+
+The inequality constraints of the MPC problem are the friction cone constraints
+
+$$
+\begin{align}
+f_\min &\leq f_{z, ij} \leq f_\max\\
+-\mu f_{z, ij} &\leq f_{x, ij} \leq \mu f_{z, ij}\\
+-\mu f_{z, ij} &\leq f_{y, ij} \leq \mu f_{z, ij}.
+\end{align}
+$$
+
+We can write this as six individual constraints
+
+$$
+\begin{align}
+-f_{z, ij} &\leq -f_\min\\
+f_{z, ij} &\leq f_\max\\
+-f_{x, ij} - \mu f_{z, ij} &\leq 0\\
+f_{x, ij} - \mu f_{z, ij} &\leq 0\\
+-f_{y, ij} - \mu f_{z, ij} &\leq 0\\
+f_{y, ij} - \mu f_{z, ij} &\leq 0.
+\end{align}
+$$
+
+This can be written as $\bar{\mathbf{c}}_{\mathbf{f}}\mathbf{f}_{ij} \leq \bar{\mathrm{ub}}$, with
+
+$$
+\bar{\mathbf{c}}_{\mathbf{f}} = \begin{bmatrix}
+0 & 0 & -1\\
+0 & 0 & 1\\
+-1 & 0 & -\mu\\
+1 & 0 & -\mu\\
+0 & -1 & -\mu\\
+0 & 1 & -\mu
+\end{bmatrix} \quad \bar{\mathrm{ub}}_\mathbf{f} = \begin{bmatrix}
+-f_\min\\
+f_\max\\
+0\\
+0\\
+0\\
+0
+\end{bmatrix}
+$$
+
+with $i\in\{1, \cdots, N-1\}$ representing the $i$-th time step and $j\in\{\mathrm{FL}, \mathrm{FR}, \mathrm{HL}, \mathrm{HR}\}$ representing the foot $j$. Note that this constraint is only applied to stance feet. 
+
+First, we would need a mask to select the stance feet, we call this masking matrix $\mathcal{M}_{st}$, the masking matrix would need to the number of stance feet $n_{st}$ and their indices $j$. The size of $\mathcal{M}_{st}$ is $3n_{st} \times 12$. If the front left (FL) and hind right (HR) feet are the stance feet then we have 
+
+$$
+\mathcal{M}_{st} = \begin{bmatrix}
+\mathbf{I}_3 & \mathbf{0}_3 & \mathbf{0}_3 & \mathbf{0}_3\\
+\mathbf{0}_3 & \mathbf{0}_3 & \mathbf{0}_3 & \mathbf{I}_3
+\end{bmatrix}\in\mathbb{R}^{6\times12}.
+$$
+
+If the front left (FL), front right (FR), and hind right (HR) feet are the stance feet then we have
+
+$$
+\mathcal{M}_{st} = \begin{bmatrix}
+\mathbf{I}_3 & \mathbf{0}_3 & \mathbf{0}_3 & \mathbf{0}_3\\
+\mathbf{0}_3 & \mathbf{I}_3 & \mathbf{0}_3 & \mathbf{0}_3\\
+\mathbf{0}_3 & \mathbf{0}_3 & \mathbf{0}_3 & \mathbf{I}_3
+\end{bmatrix}\in\mathbb{R}^{9\times12}.
+$$
+
+Then, the friction cone constraint at each time step becomes
+
+$$
+\mathbf{c}_{\mathbf{f}}\mathcal{M}_{st}\mathbf{f}_i \leq \mathrm{ub}_\mathbf{f}
+$$
+
+with 
+
+$$
+\mathbf{c}_{\mathbf{f}} = \mathrm{blockdiag}\Big(\underbrace{\bar{\mathbf{c}}_{\mathbf{f}}, \cdots, \bar{\mathbf{c}}_{\mathbf{f}}}_{n_{st}}\Big)\in\mathbb{R}^{6n_{st}\times3n_{st}} \quad \mathrm{ub}_\mathbf{f} = \mathrm{vstack}\Big(\underbrace{\bar{\mathrm{ub}}_\mathbf{f}, \cdots, \bar{\mathrm{ub}}_\mathbf{f}}_{n_{st}}\Big)\in\mathbb{R}^{6n_{st}\times1}
+$$
+
+We can then combine the friction cone constraints for the entire time horizon, and be in the form of
+
+$$
+\mathbf{C}_\mathbf{f}x_\mathbf{f} \leq \mathrm{UB}_\mathbf{f}\\
+$$(eqn:friction_cone_constraint)
+
+with
+
+$$
+\begin{align}
+\mathbf{C}_\mathbf{f} &= \mathrm{blockdiag}\Big(\mathbf{c}_{\mathbf{f}}\mathcal{M}_{st}, \cdots, \mathbf{c}_{\mathbf{f}}\mathcal{M}_{st}\Big)\in\mathbb{R}^{6n_{st}N\times12N}\\
+\mathrm{UB}_\mathbf{f} &= \mathrm{vstack}\Big(\mathrm{ub}_\mathbf{f}, \cdots, \mathrm{ub}_\mathbf{f}\Big)\in\mathbb{R}^{6n_{st}N\times1}
+\end{align}
+$$
+
+If we also include $x_\mathbf{x}$, we have the final inequality constraint as $\mathbf{C}x \leq \mathrm{UB}$, where
+
+$$
+\mathbf{C} = \begin{bmatrix}
+\mathbf{0} & \mathbf{C}_\mathbf{f}
+\end{bmatrix}\in\mathbb{R}^{6n_{st}N\times27N} \quad \mathrm{UB} = \mathrm{UB}_\mathbf{f}\in\mathbb{R}^{6n_{st}N\times1}.
 $$
