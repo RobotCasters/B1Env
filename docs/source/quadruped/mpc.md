@@ -219,3 +219,93 @@ $$
 $$(eqn:qp_solver_formulation)
 
 Thus, our final task is to transform the MPC formulation {eq}`eqn:mpc_formulation` into the form of {eq}`eqn:qp_solver_formulation`.
+
+### Objective Function
+
+First, we write the objective function in a quadratic form. Let's initially focus on writing the cost for a single time step
+
+$$
+\|\mathbf{v}_{i+1} - \mathbf{v}_{i+1}^\mathrm{ref}\|_2^2 + \|\mathbf{z}_{i+1} - \mathbf{z}_{i+1}^\mathrm{ref}\|_2^2 + \|\mathbf{f}_i\|_2^2
+$$
+
+in a quadratic form. The first two terms can be written as
+
+$$
+\begin{align}
+&\ (\mathbf{x}_{i+1} - \mathbf{x}_{i+1}^\mathrm{ref})^T\mathbf{Q}_{i+1}(\mathbf{x}_{i+1} - \mathbf{x}_{i+1}^\mathrm{ref})\\
+=&\ \mathbf{x}_{i+1}^T\mathbf{Q}_{i+1}\mathbf{x}_{i+1} - 2(\mathbf{x}_{i+1}^\mathrm{ref})^T\mathbf{Q}_{i+1}\mathbf{x}_{i+1} + (\mathbf{x}_{i+1}^\mathrm{ref})^T\mathbf{Q}_{i+1}\mathbf{x}_{i+1}^\mathrm{ref}.
+\end{align}
+$$
+
+with 
+
+$$
+\mathbf{x}_{i+1}^\mathrm{ref} = \begin{bmatrix}
+    \mathbf{e}_z^\mathrm{ref}\\
+    \mathbf{0}_{3\times1}\\
+    \mathbf{v}_{i+1}^\mathrm{ref}\\
+    \mathbf{0}_{3\times1}\\
+    \mathbf{0}_{3\times1}
+\end{bmatrix}\in\mathbb{R}^{15\times1} \quad \mathbf{Q}_{i+1} = \mathrm{blockdiag}\Big(\mathbf{I}_{3}, \mathbf{0}_{3\times3}, \mathbf{I}_{3}, \mathbf{0}_{6\times6}\Big)\in\mathbb{R}^{15\times15}.
+$$
+
+The last term can be written as
+
+$$
+\mathbf{f}_i^T\mathbf{R}_{i}\mathbf{f}_i,\ \mathbf{R}_{i} = \mathbf{I}_{12}.
+$$
+
+Then, we have the equivalent objective function as
+
+$$
+\sum_{i=0}^{N-1}{\mathbf{x}_{i+1}^T\mathbf{Q}_{i+1}\mathbf{x}_{i+1} + \mathbf{f}_i^T\mathbf{R}_{i}\mathbf{f}_i - 2(\mathbf{x}_{i+1}^\mathrm{ref})^T\mathbf{Q}_{i+1}\mathbf{x}_{i+1}}.
+$$
+
+We can group the quadratic terms for the states as $\displaystyle\frac{1}{2}x_{\mathbf{x}}^T\mathbf{H}_\mathbf{Q}x_{\mathbf{x}}$, with
+
+$$
+x_{\mathbf{x}} = \begin{bmatrix}
+    \mathbf{x}_{1}\\
+    \vdots\\
+    \mathbf{x}_{N}
+\end{bmatrix}\in\mathbb{R}^{15N\times1} \quad \mathbf{H}_\mathbf{Q} = 2\mathrm{blockdiag}\Big(\mathbf{Q}_{1}, \cdots, \mathbf{Q}_{N}\Big)\in\mathbb{R}^{15N\times15N}.
+$$
+
+Similarly, we can group the quadratic terms for the GRFs as $\displaystyle\frac{1}{2}x_{\mathbf{f}}^T\mathbf{H}_\mathbf{R}x_{\mathbf{f}}$, with
+
+$$
+x_{\mathbf{f}} = \begin{bmatrix}
+    \mathbf{f}_0\\
+    \vdots\\
+    \mathbf{f}_{N-1}
+\end{bmatrix}\in\mathbb{R}^{12N\times1} \quad \mathbf{H}_\mathbf{R} = 2\mathrm{blockdiag}\Big(\mathbf{R}_{0}, \cdots, \mathbf{R}_{N-1}\Big)\in\mathbb{R}^{12N\times12N}.
+$$
+
+The linear terms can be grouped as $\mathbf{g}_\mathbf{x}^Tx_\mathbf{x}$, with
+
+$$
+\mathbf{g}_\mathbf{x} = \begin{bmatrix}
+    -2\mathbf{Q}_{1}^T\mathbf{x}_{1}^\mathrm{ref}\\
+    \vdots\\
+    -2\mathbf{Q}_{N}^T\mathbf{x}_{N}^\mathrm{ref}
+\end{bmatrix}\in\mathbb{R}^{15N\times1}.
+$$
+
+Additionally, we define $\mathbf{g}_\mathbf{f} = \mathbf{0}_{12N\times1}$. Then, we can have the MPC objective in the form of {eq}`eqn:qp_solver_formulation`, with
+
+$$
+\begin{align}
+x &= \begin{bmatrix}
+    x_{\mathbf{x}}\\
+    x_{\mathbf{f}}
+\end{bmatrix}\in\mathbb{R}^{27N\times1}\\
+\mathbf{H} &= \begin{bmatrix}
+    \mathbf{H}_\mathbf{Q} & \mathbf{0}_{15N\times12N}\\
+    \mathbf{0}_{12N\times15N} & \mathbf{H}_\mathbf{R}
+\end{bmatrix}\in\mathbb{R}^{27N\times27N}\\
+\mathbf{g} &= \begin{bmatrix}
+    \mathbf{g}_\mathbf{x}\\
+    \mathbf{g}_\mathbf{f}
+\end{bmatrix}\in\mathbb{R}^{27N\times1}.
+\end{align}
+$$
