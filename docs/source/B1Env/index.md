@@ -6,4 +6,5 @@ Documentation of the `B1Env` codebase.
 :hidden:
 
 b1_env.md
+mpc.md
 ```
