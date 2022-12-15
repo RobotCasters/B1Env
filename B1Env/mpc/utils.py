@@ -1,7 +1,7 @@
-import numpy as np
-
-from scipy.linalg import block_diag
 from pdb import set_trace
+
+import numpy as np
+from scipy.linalg import block_diag
 
 
 def get_Q_step():
@@ -158,3 +158,92 @@ def get_g(x_ref_mat, timesteps=16):
     g = np.vstack((g_x, g_f))
 
     return g
+
+
+def get_bcf(mu=0.6):
+    r"""
+    Computes the friction cone coefficient matrix ``bc_f``:
+
+    .. math:: 
+        \bar{\mathbf{c}}_\mathbf{f} = \begin{bmatrix}
+            0 & 0 & -1\\
+            0 & 0 & 1\\
+            -1 & 0 & -\mu\\
+            1 & 0 & -\mu\\
+            0 & -1 & -\mu\\
+            0 & 1 & -\mu
+        \end{bmatrix}\in\mathbb{R}^{6\times3}
+        
+    :param mu: the friction coefficient ``mu``
+    :type mu: float
+    :return: friction cone coefficient matrix ``bc_f``
+    :rtype: ndarray
+    """
+
+    bc_f = np.array(
+        [[0, 0, -1], [0, 0, 1], [-1, 0, -mu], [1, 0, -mu], [0, -1, -mu], [0, 1, -mu]]
+    )
+
+    return bc_f
+
+
+def get_bubf(f_min=1e-3, f_max=10.0):
+    r"""
+    Computes the friction cone constraint upper bound vector ``bub_f``:
+
+    .. math::
+        \bar{\mathrm{ub}}_\mathbf{f} = \begin{bmatrix}
+            -f_\min\\
+            f_\max\\
+            0\\
+            0\\
+            0\\
+            0
+        \end{bmatrix}
+    
+    :param f_min: the minimum support force
+    :type f_min: float
+    :param f_max: the maximum support force
+    :type f_max: float
+    :return: friction cone constraint upper bound vector ``bub_f``
+    :rtype: ndarray
+    """
+
+    bub_f = np.array([[-f_min], [f_max], [0.0], [0.0], [0.0], [0.0]])
+
+    return bub_f
+
+
+def get_UB(n_st, f_min=1e-3, f_max=10.0, timesteps=16):
+    r"""
+    Computes the inequality constraint upper bound ``UB``
+
+    .. math::
+        \mathrm{UB} = \mathrm{UB}_\mathbf{f} = \mathrm{vstack}\Big(\mathrm{ub}_\mathbf{f}, \cdots, \mathrm{ub}_\mathbf{f}\Big)\in\mathbb{R}^{6n_{st}N\times1}
+
+    First, it computes the value of ``bub_f``. Then, it computes the value of ``ub_f`` as
+
+    .. math::
+        \mathrm{ub}_\mathbf{f} = \mathrm{vstack}\Big(\bar{\mathrm{ub}}_\mathbf{f}, \cdots, \bar{\mathrm{ub}}_\mathbf{f}\Big)\in\mathbb{R}^{6n_{st}\times1}
+
+    :param n_st: the number of stance feet at each time instance (gait dependent)
+    :type n_st: int
+    :param f_min: the minimum support force
+    :type f_min: float
+    :param f_max: the maximum support force
+    :type f_max: float
+    :param timesteps: the number of timestep considered within the MPC preview horizon
+    :type timesteps: int
+    :return: inequality constraint upper bound ``UB``
+    :rtype: ndarray
+    """
+
+    bub_f = get_bubf(f_min=f_min, f_max=f_max)
+    bub_f_list = [bub_f] * n_st
+
+    ub_f = np.concatenate(bub_f_list, axis=0)
+    ub_f_list = [ub_f] * timesteps
+
+    UB = np.concatenate(ub_f_list, axis=0)
+
+    return UB
