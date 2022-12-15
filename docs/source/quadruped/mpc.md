@@ -355,7 +355,7 @@ f_\max\\
 \end{bmatrix}
 $$
 
-with $i\in\{1, \cdots, N-1\}$ representing the $i$-th time step and $j\in\{\mathrm{FL}, \mathrm{FR}, \mathrm{HL}, \mathrm{HR}\}$ representing the foot $j$. Note that this constraint is only applied to stance feet. 
+with $i\in\{0, \cdots, N-1\}$ representing the $i$-th time step and $j\in\{\mathrm{FL}, \mathrm{FR}, \mathrm{HL}, \mathrm{HR}\}$ representing the foot $j$. Note that this constraint is only applied to stance feet. 
 
 First, we would need a mask to select the stance feet, we call this masking matrix $\mathcal{M}_{st}$, the masking matrix would need to the number of stance feet $n_{st}$ and their indices $j$. The size of $\mathcal{M}_{st}$ is $3n_{st} \times 12$. If the front left (FL) and hind right (HR) feet are the stance feet then we have 
 
@@ -398,7 +398,7 @@ with
 
 $$
 \begin{align}
-\mathbf{C}_\mathbf{f} &= \mathrm{blockdiag}\Big(\mathbf{c}_{\mathbf{f}}\mathcal{M}_{st, 1}, \cdots, \mathbf{c}_{\mathbf{f}}\mathcal{M}_{st, N}\Big)\in\mathbb{R}^{6n_{st}N\times12N}\\
+\mathbf{C}_\mathbf{f} &= \mathrm{blockdiag}\Big(\mathbf{c}_{\mathbf{f}}\mathcal{M}_{st, 0}, \cdots, \mathbf{c}_{\mathbf{f}}\mathcal{M}_{st, N-1}\Big)\in\mathbb{R}^{6n_{st}N\times12N}\\
 \mathrm{UB}_\mathbf{f} &= \mathrm{vstack}\Big(\mathrm{ub}_\mathbf{f}, \cdots, \mathrm{ub}_\mathbf{f}\Big)\in\mathbb{R}^{6n_{st}N\times1}
 \end{align}
 $$
@@ -409,4 +409,107 @@ $$
 \mathbf{C} = \begin{bmatrix}
 \mathbf{0} & \mathbf{C}_\mathbf{f}
 \end{bmatrix}\in\mathbb{R}^{6n_{st}N\times27N} \quad \mathrm{UB} = \mathrm{UB}_\mathbf{f}\in\mathbb{R}^{6n_{st}N\times1}.
+$$
+
+### Equality Constraint
+
+The equality constraint has two components
+
+$$
+\mathbf{f}_i^\mathrm{swing} = 0 \quad \& \quad\mathbf{x}_{i+1} = \bar{\mathbf{A}}_{i}\mathbf{x}_{i} + \bar{\mathbf{B}}_{i}\mathbf{u}_{i}.
+$$
+
+For the first equality constraint, we can write it as
+
+$$\mathcal{M}_\mathrm{sw, i}\mathbf{f}_i = \mathbf{0}$$
+
+where $\mathcal{M}_\mathrm{sw, i}\in\mathbb{R}^{3n_{sw}\times12}$. It's construction is exactly like $\mathcal{M}_\mathrm{st}$. If the front right (FR) and hind left (HL) feet are the swing feet then we have
+
+$$
+\mathcal{M}_{sw} = \begin{bmatrix}
+\mathbf{0}_3 & \mathbf{I}_3 & \mathbf{0}_3 & \mathbf{0}_3\\
+\mathbf{0}_3 & \mathbf{0}_3 & \mathbf{I}_3 & \mathbf{0}_3
+\end{bmatrix}\in\mathbb{R}^{6\times12}.
+$$
+
+If we group the terms for all $N$ time steps we have
+
+$$
+\mathbf{A}_fx = \begin{bmatrix}
+    \mathbf{0} & \mathbf{M}_\mathrm{sw}
+\end{bmatrix}\begin{bmatrix}
+    x_\mathbf{x}\\
+    x_\mathbf{f}
+\end{bmatrix} = \mathbf{b}_f = \mathbf{0}
+$$
+
+with
+
+$$
+\mathbf{M}_\mathrm{sw} = \mathrm{blockdiag}\Big(\mathcal{M}_{sw, 0}, \cdots, \mathcal{M}_{sw, N-1}\Big)\in\mathbb{R}^{3n_{sw}N\times12N}
+$$
+
+$\mathbf{A}_f\in\mathbb{R}^{3n_{sw}N\times27N}$ and $\mathbf{b}_f\in\mathbb{R}^{3n_{sw}N\times1}$.
+
+The second part concerns the constraints $\mathbf{x}_{i+1} = \bar{\mathbf{A}}_{i}\mathbf{x}_{i} + \bar{\mathbf{B}}_{i}\mathbf{u}_{i}$ for $i = 0, \cdots, N-1$. We can first list all of the constraints for the system dynamics
+
+$$
+\begin{align}
+\mathbf{x}_1 &= \bar{\mathbf{A}}_0\mathbf{x}_0 + \bar{\mathbf{B}}_0\mathbf{u}_0\\
+\mathbf{x}_2 &= \bar{\mathbf{A}}_1\mathbf{x}_1 + \bar{\mathbf{B}}_1\mathbf{u}_1\\
+             &\vdots\\
+\mathbf{x}_N &= \bar{\mathbf{A}}_{N-1}\mathbf{x}_{N-1} + \bar{\mathbf{B}}_{N-1}\mathbf{u}_{N-1}
+\end{align}
+$$
+
+We can move all of the terms contained in $x$ to the left-hand-side
+
+$$
+\begin{align}
+\mathbf{x}_1 - \bar{\mathbf{B}}_0\mathbf{u}_0 &= \bar{\mathbf{A}}_0\mathbf{x}_0\\
+-\bar{\mathbf{A}}_1\mathbf{x}_1 + \mathbf{x}_2 - \bar{\mathbf{B}}_1\mathbf{u}_1&= \mathbf{0}\\
+             &\vdots\\
+-\bar{\mathbf{A}}_{N-1}\mathbf{x}_{N-1} + \mathbf{x}_N - \bar{\mathbf{B}}_{N-1}\mathbf{u}_{N-1} &= \mathbf{0}
+\end{align}
+$$
+
+Then, we can write the above set of equations as a single equation $\bar{\mathbf{A}}x_{\mathbf{x}} + \bar{\mathbf{B}}x_\mathbf{f} = \mathbf{b}_d$, with
+
+$$
+\begin{align}
+    \bar{\mathbf{A}} &= \begin{bmatrix}
+        \mathbf{I}_{15} & \mathbf{0}_{15} & \cdots & \mathbf{0}_{15} & \mathbf{0}_{15}\\
+        -\bar{\mathbf{A}}_1 & \mathbf{I}_{15} & \cdots & \mathbf{0}_{15} & \mathbf{0}_{15}\\
+        \vdots & \vdots & \ddots & \vdots & \vdots\\
+        \mathbf{0}_{15} & \mathbf{0}_{15} & \cdots & -\bar{\mathbf{A}}_{N-1} & \mathbf{I}_{15}
+    \end{bmatrix}\in\mathbb{R}^{15N\times15N}\\
+    \bar{\mathbf{B}} &= \mathrm{blockdiag}\Big(\bar{\mathbf{B}}_0, \cdots, \bar{\mathbf{B}}_{N-1}\Big)\in\mathbb{R}^{15N\times12N}\\
+    \mathbf{b}_d &= \begin{bmatrix}
+        \bar{\mathbf{A}}_0\mathbf{x}_0\\
+        \mathbf{0}
+    \end{bmatrix}\in\mathbb{R}^{15N\times1}.
+\end{align}
+$$
+
+We can also write $\bar{\mathbf{A}}x_{\mathbf{x}} + \bar{\mathbf{B}}x_\mathbf{f} = \mathbf{b}_d$ as
+
+$$
+\mathbf{A}_dx = \begin{bmatrix}
+    \bar{\mathbf{A}} & \bar{\mathbf{B}}
+\end{bmatrix}\begin{bmatrix}
+    x_{\mathbf{x}}\\
+    x_\mathbf{f}
+\end{bmatrix} = \mathbf{b}_d.
+$$
+
+Finally, we can write the equality constraint in the form of $\mathbf{A}x = \mathbf{b}$ with
+
+$$
+\mathbf{A} = \begin{bmatrix}
+    \mathbf{A}_d\\
+    \mathbf{A}_f
+\end{bmatrix}\quad \& \quad \mathbf{b} = \begin{bmatrix}
+    \mathbf{b}_d\\
+    \mathbf{b}_f
+\end{bmatrix}.
 $$
