@@ -97,7 +97,7 @@ def get_gx(x_ref_mat, timesteps=16):
             \vdots\\
             -2\mathbf{Q}_{N}^T\mathbf{x}_{N}^\mathrm{ref}
         \end{bmatrix}\in\mathbb{R}^{15N\times1}
-    
+
     by taking ``x_ref_mat`` as its input
 
     .. math::
@@ -106,7 +106,7 @@ def get_gx(x_ref_mat, timesteps=16):
             \vdots\\
             \mathbf{x}_N^\mathrm{ref}
         \end{bmatrix}\in\mathbb{R}^{15N\times1}
-    
+
     and performing the computation
 
     .. math::
@@ -135,7 +135,7 @@ def get_g(x_ref_mat, timesteps=16):
             \mathbf{g}_\mathbf{x}\\
             \mathbf{g}_\mathbf{f}
         \end{bmatrix}\in\mathbb{R}^{27N\times1}
-    
+
     by taking ``x_ref_mat`` as its input
 
     .. math::
@@ -164,7 +164,7 @@ def get_bcf(mu=0.6):
     r"""
     Computes the friction cone coefficient matrix ``bc_f``:
 
-    .. math:: 
+    .. math::
         \bar{\mathbf{c}}_\mathbf{f} = \begin{bmatrix}
             0 & 0 & -1\\
             0 & 0 & 1\\
@@ -173,7 +173,7 @@ def get_bcf(mu=0.6):
             0 & -1 & -\mu\\
             0 & 1 & -\mu
         \end{bmatrix}\in\mathbb{R}^{6\times3}
-        
+
     :param mu: the friction coefficient ``mu``
     :type mu: float
     :return: friction cone coefficient matrix ``bc_f``
@@ -200,7 +200,7 @@ def get_bubf(f_min=1e-3, f_max=10.0):
             0\\
             0
         \end{bmatrix}
-    
+
     :param f_min: the minimum support force
     :type f_min: float
     :param f_max: the maximum support force
@@ -232,7 +232,7 @@ def get_C(n_st, M_st, timesteps=16, mu=0.6):
 
     .. math::
         \mathbf{c}_{\mathbf{f}} = \mathrm{blockdiag}\Big(\underbrace{\bar{\mathbf{c}}_{\mathbf{f}}, \cdots, \bar{\mathbf{c}}_{\mathbf{f}}}_{n_{st}}\Big)\in\mathbb{R}^{6n_{st}\times3n_{st}}
-    
+
     and then constructing the matrix
 
     .. math::
@@ -241,7 +241,7 @@ def get_C(n_st, M_st, timesteps=16, mu=0.6):
             \vdots & \ddots & \vdots\\
             \mathbf{0} & \cdots & \mathbf{c}_{\mathbf{f}}
         \end{bmatrix}\in\mathbb{R}^{6n_{st}N\times3n_{st}N}
-    
+
     The input ``M_st`` is the matrix
 
     .. math::
@@ -250,7 +250,7 @@ def get_C(n_st, M_st, timesteps=16, mu=0.6):
             \vdots & \ddots & \vdots\\
             \mathbf{0} & \cdots & \mathcal{M}_{st, N}
         \end{bmatrix}\in\mathbb{R}^{3n_{st}N\times12N}
-    
+
     We can then compute ``C_f`` as
 
     .. math::
