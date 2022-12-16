@@ -316,3 +316,87 @@ def get_UB(n_st, f_min=1e-3, f_max=10.0, timesteps=16):
     UB = np.concatenate(ub_f_list, axis=0)
 
     return UB
+
+
+def get_b(bA_0, x_0, n_sw, timesteps=16):
+    r"""
+    Computes the ``b`` matrix in the QP equality constraint. The ``b`` matrix is defined as
+
+    .. math::
+        \mathbf{b} = \begin{bmatrix}
+            \mathbf{b}_d\\
+            \mathbf{b}_f
+        \end{bmatrix}\in\mathbb{R}^{(15 + 3n_{sw})N\times1}
+
+    with
+
+    .. math::
+        \mathbf{b}_d = \begin{bmatrix}
+            \bar{\mathbf{A}}_0\mathbf{x}_0\\
+            \mathbf{0}
+        \end{bmatrix}\in\mathbb{R}^{15N\times1} \quad \text{&} \quad \mathbf{b}_f = \mathbf{0}\in\mathbb{R}^{3n_{sw}N\times1}.
+
+    :param bA_0: the drift matrix at the current state
+    :type bA_0: ndarray
+    :param x_0: the current centroidal dynamics state
+    :type x_0: ndarray
+    :param n_sw: the number of swing feet at each time instance (gait dependent)
+    :type n_sw: int
+    :param timesteps: the number of timestep considered within the MPC preview horizon
+    :type timesteps: int
+    :return: the ``b`` matrix in the QP equality constraint
+    :rtype: ndarray
+    """
+
+    b_f = np.zeros((3 * n_sw * timesteps, 1))
+    b_d = np.vstack((bA_0 @ x_0, np.zeros((14 * timesteps, 1))))
+
+    b = np.vstack((b_d, b_f))
+
+    return b
+
+
+def get_A(bA, bB, M_sw, n_sw, timesteps=16):
+    r"""
+    Computes the ``A`` matrix in the QP equality constraint. The ``A`` matrix is defined as
+
+    .. math::
+        \mathbf{A} = \begin{bmatrix}
+            \mathbf{A}_d\\
+            \mathbf{A}_f
+        \end{bmatrix}\in\mathbb{R}^{(15+3n_{sw})N\times27N}
+
+    with
+
+    .. math::
+        \mathbf{A}_d = \begin{bmatrix}
+            \bar{\mathbf{A}} & \bar{\mathbf{B}}
+        \end{bmatrix}\in\mathbb{R}^{15N\times27N} \quad \text{&} \quad \mathbf{A}_f = \begin{bmatrix}
+            \mathbf{0} & \mathbf{M}_\mathrm{sw}
+        \end{bmatrix}\in\mathbb{R}^{3n_{sw}N\times27N}.
+    
+    And the matrix ``M_sw`` is defined as
+
+    .. math::
+        \mathbf{M}_\mathrm{sw} = \mathrm{blockdiag}\Big(\mathcal{M}_{sw, 0}, \cdots, \mathcal{M}_{sw, N-1}\Big)\in\mathbb{R}^{3n_{sw}N\times12N}.
+
+    :param bA: the aggregated drift matrix
+    :type bA: ndarray
+    :param bB: the aggregated control matrix
+    :type bB: ndarray
+    :param M_sw: the swing foot selection matrix
+    :type M_sw: ndarray
+    :param n_sw: the number of swing feet at each time instance (gait dependent)
+    :type n_sw: int
+    :param timesteps: the number of timestep considered within the MPC preview horizon
+    :type timesteps: int
+    :return: the ``A`` matrix in the QP equality constraint
+    :rtype: ndarray
+    """
+
+    A_d = np.hstack((bA, bB))
+    A_f = np.hstack((np.zeros((3 * n_sw * timesteps, 15 * timesteps)), M_sw))
+
+    A = np.vstack((A_d, A_f))
+
+    return A

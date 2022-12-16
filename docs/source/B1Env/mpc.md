@@ -33,3 +33,8 @@ The utiltiy functions can be grouped into three groups, one group used to comput
 ```
 
 ### Equality Constraint Utilities
+
+```{eval-rst}
+.. autofunction:: B1Env.mpc.utils.get_b
+.. autofunction:: B1Env.mpc.utils.get_A
+```
