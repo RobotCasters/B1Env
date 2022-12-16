@@ -214,9 +214,78 @@ def get_bubf(f_min=1e-3, f_max=10.0):
     return bub_f
 
 
+def get_C(n_st, M_st, timesteps=16, mu=0.6):
+    r"""
+    Computes the inequality constraint matrix ``C``:
+
+    .. math::
+        \mathbf{C} = \begin{bmatrix}
+            \mathbf{0} & \mathbf{C}_\mathrm{f}
+        \end{bmatrix}\in\mathbb{R}^{6n_{st}N\times27N}
+
+    where
+
+    .. math::
+        \mathbf{C}_\mathrm{f} = \mathrm{blockdiag}\Big(\mathbf{c}_{\mathbf{f}}\mathcal{M}_{st, 0}, \cdots, \mathbf{c}_{\mathbf{f}}\mathcal{M}_{st, N-1}\Big)\in\mathbb{R}^{6n_{st}N\times12N}
+
+    We compute this by first computing
+
+    .. math::
+        \mathbf{c}_{\mathbf{f}} = \mathrm{blockdiag}\Big(\underbrace{\bar{\mathbf{c}}_{\mathbf{f}}, \cdots, \bar{\mathbf{c}}_{\mathbf{f}}}_{n_{st}}\Big)\in\mathbb{R}^{6n_{st}\times3n_{st}}
+    
+    and then constructing the matrix
+
+    .. math::
+        \texttt{c_f_mat} = \begin{bmatrix}
+            \mathbf{c}_{\mathbf{f}} & \cdots & \mathbf{0}\\
+            \vdots & \ddots & \vdots\\
+            \mathbf{0} & \cdots & \mathbf{c}_{\mathbf{f}}
+        \end{bmatrix}\in\mathbb{R}^{6n_{st}N\times3n_{st}N}
+    
+    The input ``M_st`` is the matrix
+
+    .. math::
+        \texttt{M_st} = \begin{bmatrix}
+            \mathcal{M}_{st, 1} & \cdots & \mathbf{0}\\
+            \vdots & \ddots & \vdots\\
+            \mathbf{0} & \cdots & \mathcal{M}_{st, N}
+        \end{bmatrix}\in\mathbb{R}^{3n_{st}N\times12N}
+    
+    We can then compute ``C_f`` as
+
+    .. math::
+        \mathbf{C}_\mathbf{f} = \texttt{c_f_mat}\texttt{M_st} = \mathrm{blockdiag}\Big(\mathbf{c}_{\mathbf{f}}\mathcal{M}_{st, 0}, \cdots, \mathbf{c}_{\mathbf{f}}\mathcal{M}_{st, N-1}\Big)\in\mathbb{R}^{6n_{st}N\times12N}
+
+    :param n_st: the number of stance feet at each time instance (gait dependent)
+    :type n_st: int
+    :param M_st: the stance foot selection matrix
+    :type M_st: ndarray
+    :param timesteps: the number of timestep considered within the MPC preview horizon
+    :type timesteps: int
+    :param mu: the friction coefficient ``mu``
+    :type mu: float
+    :return: inequality constraint matrix ``C``
+    :rtype: ndarray
+    """
+
+    bc_f = get_bcf(mu=mu)
+    bc_f_list = [bc_f] * n_st
+
+    c_f = block_diag(*bc_f_list)
+    c_f_list = [c_f] * timesteps
+    c_f_mat = block_diag(*c_f_list)
+
+    C_f = c_f_mat @ M_st
+    Zeros = np.zeros((6 * n_st * timesteps, 15 * timesteps))
+
+    C = np.hstack((Zeros, C_f))
+
+    return C
+
+
 def get_UB(n_st, f_min=1e-3, f_max=10.0, timesteps=16):
     r"""
-    Computes the inequality constraint upper bound ``UB``
+    Computes the inequality constraint upper bound ``UB``:
 
     .. math::
         \mathrm{UB} = \mathrm{UB}_\mathbf{f} = \mathrm{vstack}\Big(\mathrm{ub}_\mathbf{f}, \cdots, \mathrm{ub}_\mathbf{f}\Big)\in\mathbb{R}^{6n_{st}N\times1}
