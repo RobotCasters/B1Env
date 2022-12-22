@@ -111,6 +111,8 @@ class MPC:
     def solve(self):
         r"""
         Solves the MPC problem using the computed problem configurations.
+        Need to run ``construct_objective_function``, ``construct_inequality_constraint``,
+        and ``construct_equality_constraint`` before running this function.
         """
         if not self.qp_initialized:
             self.qp.init(H=self.H, g=self.g, A=self.A, b=self.b, C=self.C, u=self.UB)
