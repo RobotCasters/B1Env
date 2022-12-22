@@ -6,6 +6,12 @@
 .. autoclass:: B1Env.mpc.controller.MPC
 
     .. autofunction:: B1Env.mpc.controller.MPC.__init__
+    .. autofunction:: B1Env.mpc.controller.MPC.pre_construct_objective_function
+    .. autofunction:: B1Env.mpc.controller.MPC.construct_objective_function
+    .. autofunction:: B1Env.mpc.controller.MPC.pre_construct_inequality_constraint
+    .. autofunction:: B1Env.mpc.controller.MPC.construct_inequality_constraint
+    .. autofunction:: B1Env.mpc.controller.MPC.construct_equality_constraint
+    .. autofunction:: B1Env.mpc.controller.MPC.solve
 ```
 
 ## Utility Functions
