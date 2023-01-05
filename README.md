@@ -1,4 +1,4 @@
-# Unitree B1 Simulation Environment xx
+# Unitree B1 Simulation Environment
 Simulation environment for Unitree B1 robot.
 
 ## Installation
