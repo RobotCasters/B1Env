@@ -18,7 +18,7 @@ conda install -c conda-forge pinocchio
 Then clone this repo, and install it using `pip`
 
 ```console
-git clone https://github.com/BolunDai0216/B1Env.git
+git clone https://github.com/RobotCasters/B1Env.git
 cd B1Env
 python3 -m pip install -e .
 ```
