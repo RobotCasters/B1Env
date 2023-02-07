@@ -1,6 +1,4 @@
 from math import pi
-from os import environ
-from os.path import dirname, join
 
 import numpy as np
 import pinocchio as pin

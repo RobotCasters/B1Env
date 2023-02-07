@@ -1,5 +1,3 @@
-from pdb import set_trace
-
 import numpy as np
 import pinocchio as pin
 import pybullet as p
@@ -33,7 +31,7 @@ def main():
     leg_gc_force = -np.array([[0.0], [0.0], [B1Config.mass * 9.81 / 4]])
 
     # Run the simulator for 1e5 steps
-    for i in range(100000):
+    for _ in range(100000):
         q, dq = robot.get_state_update_pinocchio()
         gravity = robot.pin_robot.gravity(q)
 
@@ -43,8 +41,10 @@ def main():
             + 20.0 * (np.asarray(dq0)[6:, 0] - dq[6:])
         )
 
-        # once there is contact the robot exerts force to support the body
+        # Check contact status
         contact_status, _ = robot.end_effector_forces()
+
+        # Once there is contact the robot exerts force to support the body
         if np.sum(contact_status) > 1e-3:
             for idx in [robot.fl_index, robot.fr_index, robot.hl_index, robot.hr_index]:
                 _J = robot.pin_robot.getFrameJacobian(
