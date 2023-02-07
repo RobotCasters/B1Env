@@ -54,14 +54,14 @@ class B1Config(object):
     motor_inertia = 0.0000045
 
     # The motor gear ratio.
-    motor_gear_ration = 9.0
+    motor_gear_ratio = 9.0
 
     # pinocchio model.
     pin_robot_wrapper = RobotWrapper.BuildFromURDF(
         urdf_path, meshes_path, pin.JointModelFreeFlyer()
     )
     pin_robot_wrapper.model.rotorInertia[6:] = motor_inertia
-    pin_robot_wrapper.model.rotorGearRatio[6:] = motor_gear_ration
+    pin_robot_wrapper.model.rotorGearRatio[6:] = motor_gear_ratio
     pin_robot = pin_robot_wrapper
 
     robot_model = pin_robot_wrapper.model
@@ -139,7 +139,7 @@ class B1Config(object):
             cls.urdf_path, cls.meshes_path, pin.JointModelFreeFlyer()
         )
         robot.model.rotorInertia[6:] = cls.motor_inertia
-        robot.model.rotorGearRatio[6:] = cls.motor_gear_ration
+        robot.model.rotorGearRatio[6:] = cls.motor_gear_ratio
         return robot
 
     def joint_name_in_single_string(self):

@@ -1,4 +1,3 @@
-from pdb import set_trace
 from typing import Optional
 
 import numpy as np
@@ -94,8 +93,6 @@ class B1Sim(Env):
 
         self.observation_space = spaces.Box(obs_low, obs_high, dtype=np.float32)
         self.action_space = spaces.Box(act_low, act_high, dtype=np.float32)
-
-        set_trace()
 
     def reset(
         self,
