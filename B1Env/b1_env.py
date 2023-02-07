@@ -45,11 +45,11 @@ class B1Sim(Env):
 
         # Load Franka Research 3 Robot
         package_directory = getDataPath()
-        robot_URDF = package_directory + "/robots/b1_box_collide.urdf"
+        robot_URDF = package_directory + "/robots/b1_raw.urdf"
         urdf_search_path = package_directory + "/robots"
         p.setAdditionalSearchPath(urdf_search_path)
         self.robotID = p.loadURDF(
-            "b1_box_collide.urdf", [0.0, 0.0, 1.0], useFixedBase=useFixedBase
+            "b1_raw.urdf", [0.0, 0.0, 1.0], useFixedBase=useFixedBase
         )
 
         # Build pin_robot
@@ -94,6 +94,8 @@ class B1Sim(Env):
 
         self.observation_space = spaces.Box(obs_low, obs_high, dtype=np.float32)
         self.action_space = spaces.Box(act_low, act_high, dtype=np.float32)
+
+        set_trace()
 
     def reset(
         self,

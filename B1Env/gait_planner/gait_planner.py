@@ -1,12 +1,12 @@
 import numpy as np
 from scipy.linalg import block_diag
+
 np.set_printoptions(threshold=np.inf)
 
 
 class GaitPlanner:
     def __init__(self, config):
         self.config = config
-
 
     def phase_index(self, ticks):
         r"""
@@ -16,7 +16,7 @@ class GaitPlanner:
                 IN_STANCE_PHASE = True
             else:
                 IN_STANCE_PHASE = False
-   
+
         :param ticks: the number of time steps that have passed since the program started
         :type ticks: int
         :return: the index of gait phase that the robot is in
@@ -30,7 +30,6 @@ class GaitPlanner:
             if phase_time < phase_sum:
                 return i
         assert False
-
 
     def subphase_ticks(self, ticks):
         r"""
@@ -51,7 +50,6 @@ class GaitPlanner:
                 subphase_ticks = phase_time - phase_sum + self.config.phase_ticks[i]
                 return subphase_ticks
         assert False
-
 
     def get_Mst_i(self, ticks):
         r"""
@@ -82,33 +80,38 @@ class GaitPlanner:
 
         return self.config.mst_gait[self.phase_index(ticks)]
 
-
     def get_Mst(self, ticks, N):
         r"""
         Computes which legs are in stance position over a time horizon by giving matrix ``M_st``:
 
         .. math::
             \mathbf{M}_\mathrm{st} = \mathrm{blockdiag}\Big(\mathcal{M}_{st, 0}, \cdots, \mathcal{M}_{st, N-1}\Big)\in\mathbb{R}^{3n_{st}N\times12N}
-        
+
         :param ticks: the number of time steps that have passed since the program started
         :type ticks: int
         :param N: the time horizon
         :type N: int
-        :return: the block matrix for a time horizon with the information about the legs that are in stance phase 
+        :return: the block matrix for a time horizon with the information about the legs that are in stance phase
         :rtype: ndarray
         """
 
         mst_horizon_rem0 = block_diag(*self.config.mst_gait)
-        mst_horizon_rem0 = np.roll(mst_horizon_rem0,-12*self.phase_index(ticks),axis=1)
-        num_phases_horizon = int(N/self.config.num_phases)
-        if N%self.config.num_phases == 0:
+        mst_horizon_rem0 = np.roll(
+            mst_horizon_rem0, -12 * self.phase_index(ticks), axis=1
+        )
+        num_phases_horizon = int(N / self.config.num_phases)
+        if N % self.config.num_phases == 0:
             return block_diag(*([mst_horizon_rem0] * num_phases_horizon))
         else:
             mst_horizon = block_diag(*([mst_horizon_rem0] * num_phases_horizon))
-            for i in range(N%self.config.num_phases):
-                mst_horizon = block_diag(mst_horizon, self.config.mst_gait[(self.phase_index(ticks)+i)%self.config.num_phases])
+            for i in range(N % self.config.num_phases):
+                mst_horizon = block_diag(
+                    mst_horizon,
+                    self.config.mst_gait[
+                        (self.phase_index(ticks) + i) % self.config.num_phases
+                    ],
+                )
             return mst_horizon
-
 
     def get_Msw_i(self, ticks):
         r"""
@@ -139,29 +142,35 @@ class GaitPlanner:
 
         return self.config.msw_gait[self.phase_index(ticks)]
 
-
     def get_Msw(self, ticks, N):
         r"""
         Computes which legs are in swing position for a given time horizon by giving matrix ``M_sw``:
 
         .. math::
             \mathbf{M}_\mathrm{sw} = \mathrm{blockdiag}\Big(\mathcal{M}_{sw, 0}, \cdots, \mathcal{M}_{sw, N-1}\Big)\in\mathbb{R}^{3n_{sw}N\times12N}
-        
+
         :param ticks: the number of time steps that have passed since the program started
         :type ticks: int
         :param N: the time horizon
         :type N: int
-        :return: the block matrix for a time horizon with the information about the legs that are in swing phase 
+        :return: the block matrix for a time horizon with the information about the legs that are in swing phase
         :rtype: ndarray
         """
 
         msw_horizon_rem0 = block_diag(*self.config.msw_gait)
-        msw_horizon_rem0 = np.roll(msw_horizon_rem0,-12*self.phase_index(ticks),axis=1)
-        num_phases_horizon = int(N/self.config.num_phases)
-        if N%self.config.num_phases == 0:
+        msw_horizon_rem0 = np.roll(
+            msw_horizon_rem0, -12 * self.phase_index(ticks), axis=1
+        )
+        num_phases_horizon = int(N / self.config.num_phases)
+        if N % self.config.num_phases == 0:
             return block_diag(*([msw_horizon_rem0] * num_phases_horizon))
         else:
             msw_horizon = block_diag(*([msw_horizon_rem0] * num_phases_horizon))
-            for i in range(N%self.config.num_phases):
-                msw_horizon = block_diag(msw_horizon, self.config.msw_gait[(self.phase_index(ticks)+i)%self.config.num_phases])
+            for i in range(N % self.config.num_phases):
+                msw_horizon = block_diag(
+                    msw_horizon,
+                    self.config.msw_gait[
+                        (self.phase_index(ticks) + i) % self.config.num_phases
+                    ],
+                )
             return msw_horizon
