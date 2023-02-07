@@ -22,7 +22,7 @@ class B1Robot(PinBulletWrapper):
 
         # Load the robot
         if pos is None:
-            pos = [0.0, 0, 0.40]
+            pos = [0.0, 0, 1.0]
         if orn is None:
             orn = p.getQuaternionFromEuler([0, 0, 0])
 

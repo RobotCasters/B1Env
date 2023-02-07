@@ -1,4 +1,7 @@
+from pdb import set_trace
+
 import numpy as np
+import pinocchio as pin
 import pybullet as p
 from bullet_utils.env import BulletEnvWithGround
 
@@ -7,40 +10,53 @@ from B1Env.config import B1Config
 
 
 def main():
-    # ! Create a Pybullet simulation environment before any robots !
+    """Simulates a standing controller"""
+
+    # Create a Pybullet simulation environment before any robots
     env = BulletEnvWithGround()
 
+    # Remove debug sliders
     p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
 
     # Create a robot instance. This adds the robot to the simulator as well.
-    robot = B1Robot(useFixedBase=True)
+    robot = B1Robot(useFixedBase=False)
 
     # Add the robot to the env to update the internal structure of the robot
-    # ate every simulation steps.
+    # at every simulation steps.
     env.add_robot(robot)
-
-    # Some control.
-    tau = np.zeros(robot.nb_dof)
 
     # Reset the robot to some initial state.
     q0 = np.matrix(B1Config.initial_configuration).T
     dq0 = np.matrix(B1Config.initial_velocity).T
     robot.reset_state(q0, dq0)
 
-    # Run the simulator for 2000 steps
-    while True:
+    leg_gc_force = -np.array([[0.0], [0.0], [B1Config.mass * 9.81 / 4]])
+
+    # Run the simulator for 1e5 steps
+    for i in range(100000):
+        q, dq = robot.get_state_update_pinocchio()
+        gravity = robot.pin_robot.gravity(q)
+
+        tau = (
+            gravity[6:]
+            + 200.0 * (np.asarray(q0)[7:, 0] - q[7:])
+            + 20.0 * (np.asarray(dq0)[6:, 0] - dq[6:])
+        )
+
+        # once there is contact the robot exerts force to support the body
+        contact_status, _ = robot.end_effector_forces()
+        if np.sum(contact_status) > 1e-3:
+            for idx in [robot.fl_index, robot.fr_index, robot.hl_index, robot.hr_index]:
+                _J = robot.pin_robot.getFrameJacobian(
+                    idx, pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+                )[:3, 6:]
+                _tau_gc = _J.T @ leg_gc_force
+                tau = tau + _tau_gc[:, 0]
+
         robot.send_joint_command(tau)
 
         # Step the simulator.
-        env.step(sleep=True)  # You can sleep here if you want to slow down the replay
-
-    # Read the final state and forces after the stepping.
-    q, dq = robot.get_state()
-    active_eff, forces = robot.get_force()
-    print("q", q)
-    print("dq", dq)
-    print("active eff", active_eff)
-    print("forces", forces)
+        env.step(sleep=True)
 
 
 if __name__ == "__main__":
