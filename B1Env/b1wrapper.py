@@ -9,6 +9,10 @@ dt = 1e-3
 
 
 class B1Robot(PinBulletWrapper):
+    """
+    PinBulletWrapper: https://github.com/machines-in-motion/bullet_utils/blob/main/src/bullet_utils/wrapper.py
+    """
+
     def __init__(
         self,
         pos=None,

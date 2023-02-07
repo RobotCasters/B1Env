@@ -9,6 +9,10 @@ from B1Env import getDataPath
 
 
 class B1Config(object):
+    """
+    RobotWrapper: https://github.com/stack-of-tasks/pinocchio/blob/master/bindings/python/pinocchio/robot_wrapper.py
+    """
+
     robot_family = "unitree"
     robot_name = "b1"
 

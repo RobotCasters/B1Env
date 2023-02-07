@@ -53,6 +53,7 @@ def main():
                 _tau_gc = _J.T @ leg_gc_force
                 tau = tau + _tau_gc[:, 0]
 
+        # τ = G(q) + Kp(q_des - q) + Kd(q̇_des - q̇) + JᵀF
         robot.send_joint_command(tau)
 
         # Step the simulator.
