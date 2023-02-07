@@ -1,16 +1,20 @@
-import numpy as np
 from math import pi
-from os.path import join, dirname
 from os import environ
-import pinocchio as se3
-from pinocchio.utils import zero
+from os.path import dirname, join
+
+import numpy as np
+import pinocchio as pin
 from pinocchio.robot_wrapper import RobotWrapper
-from robot_properties_solo.resources import Resources
+from pinocchio.utils import zero
+
+from B1Env import getDataPath
 
 
 class B1Config(object):
     robot_family = "unitree"
     robot_name = "b1"
+
+    # ========== BEGIN MAYBE UNUSED VARIABLES ==========
 
     # PID gains
     kp = 5.0
@@ -37,18 +41,16 @@ class B1Config(object):
     ctrl_manager_current_to_control_gain = 1.0
 
     max_qref = pi
+    base_p_com = [0.0, 0.0, -0.02]
+
+    # =========== END MAYBE UNUSED VARIABLES ===========
 
     base_link_name = "trunk"
-    end_effector_names = ["HL_ANKLE", "HR_ANKLE", "FL_ANKLE", "FR_ANKLE"]
 
-    rot_base_to_imu = np.identity(3)
-    r_base_to_imu = np.zeros(3)
-
-    resources = Resources(robot_name)
-    meshes_path = resources.meshes_path
-    dgm_yaml_path = resources.dgm_yaml_path
-    urdf_path = resources.urdf_path
-    ctrl_path = resources.imp_ctrl_yaml_path
+    meshes_path = getDataPath()
+    # dgm_yaml_path = resources.dgm_yaml_path
+    urdf_path = meshes_path + "/robots/b1_raw.urdf"
+    # ctrl_path = resources.imp_ctrl_yaml_path
 
     # The inertia of a single blmc_motor.
     motor_inertia = 0.0000045
@@ -58,7 +60,7 @@ class B1Config(object):
 
     # pinocchio model.
     pin_robot_wrapper = RobotWrapper.BuildFromURDF(
-        urdf_path, meshes_path, se3.JointModelFreeFlyer()
+        urdf_path, meshes_path, pin.JointModelFreeFlyer()
     )
     pin_robot_wrapper.model.rotorInertia[6:] = motor_inertia
     pin_robot_wrapper.model.rotorGearRatio[6:] = motor_gear_ration
@@ -74,34 +76,34 @@ class B1Config(object):
     shoulder_names = []
     end_effector_names = []
     for leg in ["FL", "FR", "HL", "HR"]:
-        shoulder_ids.append(robot_model.getFrameId(leg + "_HAA"))
-        shoulder_names.append(leg + "_HAA")
-        end_eff_ids.append(robot_model.getFrameId(leg + "_FOOT"))
-        end_effector_names.append(leg + "_FOOT")
+        shoulder_ids.append(robot_model.getFrameId(leg + "_hip_joint"))
+        shoulder_names.append(leg + "_hip_joint")
+        end_eff_ids.append(robot_model.getFrameId(leg + "_foot"))
+        end_effector_names.append(leg + "_foot")
 
     nb_ee = len(end_effector_names)
-    hl_index = robot_model.getFrameId("HL_ANKLE")
-    hr_index = robot_model.getFrameId("HR_ANKLE")
-    fl_index = robot_model.getFrameId("FL_ANKLE")
-    fr_index = robot_model.getFrameId("FR_ANKLE")
+    hl_index = robot_model.getFrameId("HL_ankle_fixed")
+    hr_index = robot_model.getFrameId("HR_ankle_fixed")
+    fl_index = robot_model.getFrameId("FL_ankle_fixed")
+    fr_index = robot_model.getFrameId("FR_ankle_fixed")
 
     # The number of motors, here they are the same as there are only revolute
     # joints.
     nb_joints = robot_model.nv - 6
 
     joint_names = [
-        "FL_HAA",
-        "FL_HFE",
-        "FL_KFE",
-        "FR_HAA",
-        "FR_HFE",
-        "FR_KFE",
-        "HL_HAA",
-        "HL_HFE",
-        "HL_KFE",
-        "HR_HAA",
-        "HR_HFE",
-        "HR_KFE",
+        "FL_hip_joint",
+        "FL_thigh_joint",
+        "FL_knee_joint",
+        "FR_hip_joint",
+        "FR_thigh_joint",
+        "FR_knee_joint",
+        "HL_hip_joint",
+        "HL_thigh_joint",
+        "HL_knee_joint",
+        "HR_hip_joint",
+        "HR_thigh_joint",
+        "HR_knee_joint",
     ]
 
     # Mapping between the ctrl vector in the device and the urdf indexes.
@@ -128,17 +130,15 @@ class B1Config(object):
     v0 = zero(robot_model.nv)
     a0 = zero(robot_model.nv)
 
-    base_p_com = [0.0, 0.0, -0.02]
-
     rot_base_to_imu = np.identity(3)
-    r_base_to_imu = np.array([0.10407, -0.00635, 0.01540])
+    r_base_to_imu = np.zeros(3)
 
     @classmethod
     def buildRobotWrapper(cls):
         # Rebuild the robot wrapper instead of using the existing model to
         # also load the visuals.
         robot = RobotWrapper.BuildFromURDF(
-            cls.urdf_path, cls.meshes_path, se3.JointModelFreeFlyer()
+            cls.urdf_path, cls.meshes_path, pin.JointModelFreeFlyer()
         )
         robot.model.rotorInertia[6:] = cls.motor_inertia
         robot.model.rotorGearRatio[6:] = cls.motor_gear_ration
