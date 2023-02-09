@@ -30,6 +30,8 @@ def main():
 
     leg_gc_force = -np.array([[0.0], [0.0], [B1Config.mass * 9.81 / 4]])
 
+    print("mass: {}".format(B1Config.mass))
+
     # Run the simulator for 1e5 steps
     for _ in range(100000):
         q, dq = robot.get_state_update_pinocchio()
