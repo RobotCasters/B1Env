@@ -77,35 +77,35 @@ class B1Config(object):
     end_eff_ids = []
     shoulder_names = []
     end_effector_names = []
-    for leg in ["FL", "FR", "HL", "HR"]:
+    for leg in ["FR", "FL", "HR", "HL"]:
         shoulder_ids.append(robot_model.getFrameId(leg + "_hip_joint"))
         shoulder_names.append(leg + "_hip_joint")
         end_eff_ids.append(robot_model.getFrameId(leg + "_foot"))
         end_effector_names.append(leg + "_foot")
 
     nb_ee = len(end_effector_names)
-    hl_index = robot_model.getFrameId("HL_ankle_fixed")
-    hr_index = robot_model.getFrameId("HR_ankle_fixed")
-    fl_index = robot_model.getFrameId("FL_ankle_fixed")
     fr_index = robot_model.getFrameId("FR_ankle_fixed")
+    fl_index = robot_model.getFrameId("FL_ankle_fixed")
+    hr_index = robot_model.getFrameId("HR_ankle_fixed")
+    hl_index = robot_model.getFrameId("HL_ankle_fixed")
 
     # The number of motors, here they are the same as there are only revolute
     # joints.
     nb_joints = robot_model.nv - 6
 
     joint_names = [
-        "FL_hip_joint",
-        "FL_thigh_joint",
-        "FL_knee_joint",
         "FR_hip_joint",
         "FR_thigh_joint",
         "FR_knee_joint",
-        "HL_hip_joint",
-        "HL_thigh_joint",
-        "HL_knee_joint",
+        "FL_hip_joint",
+        "FL_thigh_joint",
+        "FL_knee_joint",
         "HR_hip_joint",
         "HR_thigh_joint",
         "HR_knee_joint",
+        "HL_hip_joint",
+        "HL_thigh_joint",
+        "HL_knee_joint",
     ]
 
     # Mapping between the ctrl vector in the device and the urdf indexes.

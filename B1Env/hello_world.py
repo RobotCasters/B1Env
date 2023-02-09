@@ -48,7 +48,7 @@ def main():
 
         # Once there is contact the robot exerts force to support the body
         if np.sum(contact_status) > 1e-3:
-            for idx in [robot.fl_index, robot.fr_index, robot.hl_index, robot.hr_index]:
+            for idx in [robot.fr_index, robot.fl_index, robot.hr_index, robot.hl_index]:
                 _J = robot.pin_robot.getFrameJacobian(
                     idx, pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
                 )[:3, 6:]

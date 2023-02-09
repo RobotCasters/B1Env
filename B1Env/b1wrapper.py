@@ -67,7 +67,7 @@ class B1Robot(PinBulletWrapper):
         self.end_effector_names = []
         controlled_joints = []
 
-        for leg in ["FL", "FR", "HL", "HR"]:
+        for leg in ["FR", "FL", "HR", "HL"]:
             controlled_joints += [
                 leg + "_hip_joint",
                 leg + "_thigh_joint",
@@ -79,17 +79,22 @@ class B1Robot(PinBulletWrapper):
         self.joint_names = controlled_joints
         self.nb_ee = len(self.end_effector_names)
 
-        self.hl_index = self.pin_robot.model.getFrameId("HL_ankle_fixed")
-        self.hr_index = self.pin_robot.model.getFrameId("HR_ankle_fixed")
-        self.fl_index = self.pin_robot.model.getFrameId("FL_ankle_fixed")
         self.fr_index = self.pin_robot.model.getFrameId("FR_ankle_fixed")
+        self.fl_index = self.pin_robot.model.getFrameId("FL_ankle_fixed")
+        self.hr_index = self.pin_robot.model.getFrameId("HR_ankle_fixed")
+        self.hl_index = self.pin_robot.model.getFrameId("HL_ankle_fixed")
 
         # Creates the wrapper by calling the super.__init__.
         super(B1Robot, self).__init__(
             self.robotId,
             self.pin_robot,
             controlled_joints,
-            ["FL_ankle_fixed", "FR_ankle_fixed", "HL_ankle_fixed", "HR_ankle_fixed"],
+            [
+                "FR_ankle_fixed",
+                "FL_ankle_fixed",
+                "HR_ankle_fixed",
+                "HL_ankle_fixed",
+            ],
         )
 
     def forward_robot(self, q=None, dq=None):
