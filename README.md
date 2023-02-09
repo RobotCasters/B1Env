@@ -15,6 +15,14 @@ Then install `pinocchio` using
 conda install -c conda-forge pinocchio
 ```
 
+and install `bullet_utils` using
+
+```console
+git clone https://github.com/machines-in-motion/bullet_utils.git
+cd bullet_utils
+python3 -m pip install .
+```
+
 Then clone this repo, and install it using `pip`
 
 ```console
