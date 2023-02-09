@@ -23,15 +23,16 @@ class B1Robot(PinBulletWrapper):
             0,
         ],
     ):
-
         # Load the robot
         if pos is None:
             pos = [0.0, 0, 1.0]
         if orn is None:
             orn = p.getQuaternionFromEuler([0, 0, 0])
 
+        self.config = B1Config()
+
         p.setAdditionalSearchPath(getDataPath())
-        self.urdf_path = B1Config.urdf_path
+        self.urdf_path = self.config.urdf_path
         self.robotId = p.loadURDF(
             self.urdf_path,
             pos,
@@ -42,7 +43,7 @@ class B1Robot(PinBulletWrapper):
         p.getBasePositionAndOrientation(self.robotId)
 
         # Create the robot wrapper in pinocchio.
-        self.pin_robot = B1Config.buildRobotWrapper()
+        self.pin_robot = self.config.buildRobotWrapper()
 
         # Query all the joints.
         num_joints = p.getNumJoints(self.robotId)
@@ -124,6 +125,6 @@ class B1Robot(PinBulletWrapper):
 
     def reset_to_initial_state(self) -> None:
         """Reset robot state to the initial configuration (based on B1Config)."""
-        q0 = np.matrix(B1Config.initial_configuration).T
-        dq0 = np.matrix(B1Config.initial_velocity).T
+        q0 = np.matrix(self.config.initial_configuration).T
+        dq0 = np.matrix(self.config.initial_velocity).T
         self.reset_state(q0, dq0)

@@ -32,8 +32,8 @@ class B1SDKAPI:
 
     def _init_joint_command(self):
         for motor_id in range(12):
-            self.cmd.motorCmd[motor_id].Kp = 20.0
-            self.cmd.motorCmd[motor_id].Kd = 2.0
+            self.cmd.motorCmd[motor_id].Kp = 0.0
+            self.cmd.motorCmd[motor_id].Kd = 0.0
 
     def send_joint_command(self, q_cmd, dq_cmd, tau_cmd):
         for motor_id in range(12):
