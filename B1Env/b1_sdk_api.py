@@ -17,7 +17,7 @@ class B1SDKAPI:
 
         self._init_joint_command()
 
-    def get_state(self):
+    def get_state(self, map_to_pin=True):
         self.udp.Recv()
         self.udp.GetRecv(self.state)
 
@@ -25,8 +25,16 @@ class B1SDKAPI:
         omega = self.state.imu.gyroscope
 
         base_orientation = np.array([_quat[1], _quat[2], _quat[3], _quat[0]])
-        q = np.array([motor.q for motor in self.state.motorState[:12]])
-        dq = np.array([motor.dq for motor in self.state.motorState[:12]])
+        _q = np.array([motor.q for motor in self.state.motorState[:12]])
+        _dq = np.array([motor.dq for motor in self.state.motorState[:12]])
+
+        if map_to_pin:
+            # reorder the joints from [FL, FR, HL, HR] to [FR, FL, HR, HL]
+            q = self.map_joint_idx(_q)
+            dq = self.map_joint_idx(_dq)
+        else:
+            q = _q
+            dq = _dq
 
         return base_orientation, omega, q, dq
 
@@ -35,7 +43,14 @@ class B1SDKAPI:
             self.cmd.motorCmd[motor_id].Kp = 0.0
             self.cmd.motorCmd[motor_id].Kd = 0.0
 
-    def send_joint_command(self, q_cmd, dq_cmd, tau_cmd):
+    def send_joint_command(self, _q_cmd, _dq_cmd, _tau_cmd, map_from_pin=True):
+        if map_from_pin:
+            q_cmd = self.map_joint_idx(_q_cmd)
+            dq_cmd = self.map_joint_idx(_dq_cmd)
+            tau_cmd = self.map_joint_idx(_tau_cmd)
+        else:
+            q_cmd, dq_cmd, tau_cmd = _q_cmd, _dq_cmd, _tau_cmd
+
         for motor_id in range(12):
             self.cmd.motorCmd[motor_id].q = q_cmd[motor_id]
             self.cmd.motorCmd[motor_id].dq = dq_cmd[motor_id]
@@ -44,3 +59,21 @@ class B1SDKAPI:
         self.safe.PositionLimit(self.cmd)
         self.udp.SetSend(self.cmd)
         self.udp.Send()
+
+    def map_joint_idx(self, pin_array):
+        return np.array(
+            [
+                pin_array[3],
+                pin_array[4],
+                pin_array[5],
+                pin_array[0],
+                pin_array[1],
+                pin_array[2],
+                pin_array[9],
+                pin_array[10],
+                pin_array[11],
+                pin_array[6],
+                pin_array[7],
+                pin_array[8],
+            ]
+        )
