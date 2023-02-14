@@ -60,12 +60,13 @@ def main():
             + kd * (np.asarray(dq0)[6:, 0] - dq[6:])
         )
 
-        for idx in [robot.fr_index, robot.fl_index, robot.hr_index, robot.hl_index]:
-            _J = robot.pin_robot.getFrameJacobian(
-                idx, pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
-            )[:3, 6:]
-            _tau_gc = _J.T @ leg_gc_force
-            tau = tau + _tau_gc[:, 0]
+        # does not work yet
+        # for idx in [robot.fr_index, robot.fl_index, robot.hr_index, robot.hl_index]:
+        #     _J = robot.pin_robot.getFrameJacobian(
+        #         idx, pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+        #     )[:3, 6:]
+        #     _tau_gc = _J.T @ leg_gc_force
+        #     tau = tau + _tau_gc[:, 0]
 
         # set desired joint position and velocity to zero
         q_cmd = np.zeros(12)
